@@ -6,13 +6,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
-  runApp(WebViewPage("http://192.168.1.232:93/#/login"));
+  runApp(WebViewPage());
 }
 
 class WebViewPage extends StatefulWidget {
-  String htmlUrl;
-
-  WebViewPage(this.htmlUrl);
 
   @override
   _WebViewPageState createState() {
@@ -31,10 +28,18 @@ class _WebViewPageState extends State<WebViewPage> with WidgetsBindingObserver {
     }
   }
 
+  String getAssetsPath(String path) {
+    if (Platform.isAndroid) {
+      return 'file:///android_asset/flutter_assets/' + path;
+    } else {
+      return 'file://Frameworks/App.framework/flutter_assets/' + path;
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return WebView(
-      initialUrl: widget.htmlUrl,
+      initialUrl: getAssetsPath("assets/index.html"),
       javascriptMode: JavascriptMode.unrestricted,
       javascriptChannels: javascriptChannels(context),
       onWebViewCreated: (WebViewController controller) {
@@ -51,27 +56,17 @@ class _WebViewPageState extends State<WebViewPage> with WidgetsBindingObserver {
 
   javascriptChannels(BuildContext context) {
     Set<JavascriptChannel> set = Set();
-    set.add(_saveUserInfoToApp());
-    set.add(_turnAppHome());
+    set.add(_testJavascriptChannel());
     return set;
   }
 
-  JavascriptChannel _saveUserInfoToApp() {
+  JavascriptChannel _testJavascriptChannel() {
     return JavascriptChannel(
-        name: "saveUserInfoToApp",
+        name: "testJavascriptChannel",
         onMessageReceived: (JavascriptMessage message) {
-          showToast("saveUserInfoToApp");
+          showToast("Js call successful");
         });
   }
-
-  JavascriptChannel _turnAppHome() {
-    return JavascriptChannel(
-        name: "turnAppHome",
-        onMessageReceived: (JavascriptMessage message) {
-          showToast("turnAppHome");
-        });
-  }
-
   showToast(String content) {
     Fluttertoast.showToast(
         msg: content,
